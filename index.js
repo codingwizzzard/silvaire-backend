@@ -15,11 +15,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(cors());
 
+app.use(async (req, res, next) => {
+  await db();
+  next();
+});
+
 app.use('/api/users', userRouter);
 app.use('/api/categories', categoryRouter);
 app.use('/api/products', productRouter);
 
-app.listen(PORT, () => {
-    db();
-    console.log("Server is running on port 5000");
-});
+// app.listen(PORT, () => {
+//     db();
+//     console.log("Server is running on port 5000");
+// });

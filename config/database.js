@@ -1,16 +1,24 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-require('dotenv').config();
+let cached = global.mongoose;
 
-let url = process.env.DB_URL;
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
 
 const db = async () => {
-    try {
-        await mongoose.connect(url);
-        console.log("Database connected");
-    } catch (error) {
-        console.log(error);
-    }
-}
+  if (cached.conn) {
+    return cached.conn;
+  }
+
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(process.env.DB_URL, {
+      bufferCommands: false,
+    }).then((mongoose) => mongoose);
+  }
+
+  cached.conn = await cached.promise;
+  return cached.conn;
+};
 
 module.exports = db;
